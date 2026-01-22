@@ -1,0 +1,16 @@
+{
+  "name": "digitalocean-web-terminal",
+  "version": "1.0.0",
+  "description": "DigitalOcean droplet launcher with web-based SSH terminal",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "socket.io": "^4.6.1",
+    "ssh2": "^1.14.0",
+    "cors": "^2.8.5",
+    "axios": "^1.6.0"
+  }
+}
