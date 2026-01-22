@@ -1,4 +1,5 @@
 // server.js - Backend server for SSH web terminal
+require('dotenv').config();
 const express = require('express');
 const http = require('http');
 const { Server } = require('socket.io');
@@ -17,6 +18,15 @@ const io = new Server(server, {
 app.use(cors());
 app.use(express.json());
 app.use(express.static('public'));
+
+// API endpoint to provide configuration to frontend
+app.get('/api/config', (req, res) => {
+  res.json({
+    apiToken: process.env.DIGITALOCEAN_API_TOKEN,
+    rootPassword: process.env.ROOT_PASSWORD,
+    vncPassword: process.env.VNC_PASSWORD
+  });
+});
 
 // Store active SSH connections
 const connections = new Map();

@@ -3,88 +3,28 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigitalOcean GUI Desktop Launcher</title>
+    <title>DigitalOcean Jump Box</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
     <div class="container">
         <div class="header">
-            <h1>DigitalOcean GUI Desktop Launcher</h1>
-            <p>Create a droplet with GUI desktop access</p>
+            <h1>Jump Box</h1>
         </div>
 
         <div class="content">
-            <!-- Create Droplet Section -->
+            <!-- Create Section -->
             <div class="section" id="setupSection">
-                <div class="section-title">Create Droplet</div>
-
-                <div class="input-group">
-                    <label for="apiToken">DigitalOcean API Token</label>
-                    <input type="password" id="apiToken" placeholder="Enter your DigitalOcean API token">
-                </div>
-
-                <div class="input-group">
-                    <label for="dropletName">Droplet Name</label>
-                    <input type="text" id="dropletName" placeholder="my-droplet" value="gui-desktop-droplet">
-                </div>
-
-                <div class="input-group">
-                    <label for="rootPassword">Root Password (8+ characters)</label>
-                    <input type="password" id="rootPassword" placeholder="Create a strong password">
-                </div>
-
-                <div class="input-group">
-                    <label for="vncPassword">VNC Password (6-8 characters)</label>
-                    <input type="password" id="vncPassword" placeholder="Create a VNC password">
-                </div>
-
                 <button class="btn" id="launchBtn">Create Droplet</button>
-
                 <div class="status" id="status"></div>
             </div>
 
-            <!-- GUI Desktop Section -->
+            <!-- Control Section -->
             <div class="section" id="guiSection" style="display: none;">
-                <div class="section-title">GUI Desktop Access</div>
-
-                <div class="droplet-info" id="dropletInfo">
-                    <h3>Droplet Status</h3>
-                    <div class="info-row">
-                        <span class="info-label">Name:</span>
-                        <span class="info-value" id="dropletNameDisplay"></span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Status:</span>
-                        <span class="info-value" id="dropletStatus"></span>
-                    </div>
-                </div>
-
-                <div class="step-info">
-                    The Ubuntu desktop with XFCE is being installed. This takes approximately 5 minutes.<br>
-                    Use "Check GUI Status" to verify if it's ready, then click "Open GUI Desktop".
-                </div>
-
-                <button class="btn btn-success" id="openGuiBtn">Open GUI Desktop</button>
                 <button class="btn btn-secondary" id="checkGuiBtn">Check GUI Status</button>
+                <button class="btn btn-success" id="openGuiBtn">Open Desktop</button>
                 <button class="btn btn-danger" id="deleteBtn">Delete Droplet</button>
-
                 <div class="status" id="guiStatus"></div>
-
-                <div class="droplet-info" id="guiInfo" style="display: none;">
-                    <h3>Desktop Information</h3>
-                    <div class="info-row">
-                        <span class="info-label">VNC Password:</span>
-                        <span class="info-value">Use the VNC password you entered above</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">Desktop Environment:</span>
-                        <span class="info-value">XFCE4 (Ubuntu 22.04)</span>
-                    </div>
-                    <div class="info-row">
-                        <span class="info-label">RustDesk:</span>
-                        <span class="info-value">Pre-installed on desktop</span>
-                    </div>
-                </div>
             </div>
         </div>
     </div>

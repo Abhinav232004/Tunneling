@@ -2,12 +2,6 @@
 
 // DOM Elements
 const elements = {
-    // Inputs
-    apiToken: document.getElementById('apiToken'),
-    dropletName: document.getElementById('dropletName'),
-    rootPassword: document.getElementById('rootPassword'),
-    vncPassword: document.getElementById('vncPassword'),
-
     // Buttons
     launchBtn: document.getElementById('launchBtn'),
     openGuiBtn: document.getElementById('openGuiBtn'),
@@ -18,74 +12,78 @@ const elements = {
     statusDiv: document.getElementById('status'),
     guiStatusDiv: document.getElementById('guiStatus'),
 
-    // Info containers
-    dropletInfoDiv: document.getElementById('dropletInfo'),
-    guiInfoDiv: document.getElementById('guiInfo'),
-    dropletNameDisplay: document.getElementById('dropletNameDisplay'),
-    dropletStatus: document.getElementById('dropletStatus'),
-
     // Sections
     guiSection: document.getElementById('guiSection')
 };
 
 // Application State
 let dropletData = null;
-let apiToken = '';
+let config = null;
+
+// Generate random droplet name
+function generateRandomDropletName() {
+    const adjectives = ['swift', 'bright', 'cosmic', 'quantum', 'cyber', 'nano', 'mega', 'ultra', 'hyper', 'super'];
+    const nouns = ['desktop', 'server', 'cloud', 'node', 'hub', 'core', 'lab', 'station', 'instance', 'machine'];
+    const randomNum = Math.floor(Math.random() * 9000) + 1000;
+    const adjective = adjectives[Math.floor(Math.random() * adjectives.length)];
+    const noun = nouns[Math.floor(Math.random() * nouns.length)];
+    return `${adjective}-${noun}-${randomNum}`;
+}
+
+// Load configuration from server
+async function loadConfig() {
+    try {
+        const response = await fetch('/api/config');
+        if (!response.ok) {
+            throw new Error('Failed to load configuration');
+        }
+        config = await response.json();
+        return config;
+    } catch (error) {
+        console.error('Error loading config:', error);
+        throw new Error('Could not load configuration from server. Make sure .env file is properly configured.');
+    }
+}
 
 // Launch Droplet Handler
 async function handleLaunchDroplet() {
-    const token = elements.apiToken.value.trim();
-    const name = elements.dropletName.value.trim();
-    const password = elements.rootPassword.value.trim();
-    const vncPass = elements.vncPassword.value.trim();
-
-    // Validate inputs
-    const validation = validateForm([
-        { value: token, errorMessage: 'Please enter your DigitalOcean API token' },
-        { value: name, errorMessage: 'Please enter a droplet name' },
-        { value: password, minLength: 8, errorMessage: 'Please enter a password (minimum 8 characters)' },
-        { value: vncPass, minLength: 6, maxLength: 8, errorMessage: 'Please enter a VNC password (6-8 characters)' }
-    ]);
-
-    if (!validation.valid) {
-        showStatus(elements.statusDiv, validation.error, 'error');
-        return;
-    }
-
-    // Store API token for later use
-    apiToken = token;
-
     setButtonLoading(elements.launchBtn, true, 'Creating Droplet...', 'Create Droplet');
 
     try {
-        showStatus(elements.statusDiv, 'Creating your droplet...', 'info');
+        // Load configuration from server
+        showStatus(elements.statusDiv, 'Loading configuration...', 'info');
+        await loadConfig();
+
+        if (!config.apiToken || !config.rootPassword || !config.vncPassword) {
+            throw new Error('Configuration is incomplete. Please check your .env file.');
+        }
+
+        // Generate random droplet name
+        const name = generateRandomDropletName();
+
+        showStatus(elements.statusDiv, `Creating droplet "${name}"...`, 'info');
 
         // Generate user data script
-        const userData = generateUserDataScript(password, vncPass);
+        const userData = generateUserDataScript(config.rootPassword, config.vncPassword);
 
         // Create droplet
-        const result = await createDroplet(token, name, userData);
+        const result = await createDroplet(config.apiToken, name, userData);
         dropletData = result.droplet;
 
         showStatus(elements.statusDiv, 'Waiting for droplet to become active (this may take 1-2 minutes)...', 'info');
 
         // Wait for droplet to be active
-        const activeDroplet = await waitForDroplet(token, dropletData.id, (status) => {
+        const activeDroplet = await waitForDroplet(config.apiToken, dropletData.id, (status) => {
             showStatus(elements.statusDiv, status, 'info');
         });
         dropletData = activeDroplet;
 
-        // Update droplet info display
-        elements.dropletNameDisplay.textContent = activeDroplet.name;
-        elements.dropletStatus.textContent = 'Active - Installing GUI Desktop';
-
-        showStatus(elements.statusDiv, 'Droplet created successfully! GUI desktop is being installed.', 'success');
+        showStatus(elements.statusDiv, 'Created! Installing (~2 min)', 'success');
 
         // Show GUI section
         showElement(elements.guiSection);
-        showElement(elements.guiInfoDiv);
 
-        showStatus(elements.guiStatusDiv, 'GUI desktop is being installed. This will take approximately 5 minutes. Use "Check GUI Status" to verify when ready.', 'info');
+        showStatus(elements.guiStatusDiv, 'Wait ~2 min then check status', 'info');
 
     } catch (error) {
         console.error('Error:', error);
@@ -98,24 +96,26 @@ async function handleLaunchDroplet() {
 // Open GUI Desktop Handler
 function handleOpenGui() {
     if (!dropletData || !dropletData.networks?.v4?.[0]?.ip_address) {
-        showStatus(elements.guiStatusDiv, 'No droplet IP address available', 'error');
+        showStatus(elements.guiStatusDiv, 'No droplet IP', 'error');
         return;
     }
 
     const dropletIp = dropletData.networks.v4[0].ip_address;
     const novncUrl = `http://${dropletIp}:6080/vnc.html`;
     window.open(novncUrl, '_blank');
+
+    showStatus(elements.guiStatusDiv, 'Opening...', 'success');
 }
 
 // Check GUI Status Handler
 async function handleCheckGui() {
     if (!dropletData || !dropletData.networks?.v4?.[0]?.ip_address) {
-        showStatus(elements.guiStatusDiv, 'No droplet IP address available', 'error');
+        showStatus(elements.guiStatusDiv, 'No droplet IP', 'error');
         return;
     }
 
     const dropletIp = dropletData.networks.v4[0].ip_address;
-    showStatus(elements.guiStatusDiv, 'Checking GUI status...', 'info');
+    showStatus(elements.guiStatusDiv, 'Checking...', 'info');
 
     try {
         const controller = new AbortController();
@@ -128,16 +128,15 @@ async function handleCheckGui() {
         });
 
         clearTimeout(timeoutId);
-        elements.dropletStatus.textContent = 'Active - GUI Desktop Ready';
-        showStatus(elements.guiStatusDiv, 'GUI Desktop is ready! Click "Open GUI Desktop" to connect.', 'success');
+        showStatus(elements.guiStatusDiv, 'Ready!', 'success');
     } catch (error) {
-        showStatus(elements.guiStatusDiv, 'GUI is still being installed. Please wait a few more minutes and try again.', 'info');
+        showStatus(elements.guiStatusDiv, 'Not ready yet (~2 min)', 'info');
     }
 }
 
 // Delete Droplet Handler
 async function handleDeleteDroplet() {
-    if (!dropletData || !apiToken) {
+    if (!dropletData || !config) {
         showStatus(elements.guiStatusDiv, 'No droplet to delete', 'error');
         return;
     }
@@ -152,7 +151,7 @@ async function handleDeleteDroplet() {
     try {
         showStatus(elements.guiStatusDiv, 'Deleting droplet...', 'info');
 
-        await deleteDroplet(apiToken, dropletData.id);
+        await deleteDroplet(config.apiToken, dropletData.id);
 
         showStatus(elements.guiStatusDiv, 'Droplet deleted successfully!', 'success');
 

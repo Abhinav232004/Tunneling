@@ -11,7 +11,7 @@ async function createDroplet(token, name, userData) {
         },
         body: JSON.stringify({
             name: name,
-            region: 'nyc3',
+            region: 'sgp1',
             size: 's-1vcpu-1gb',
             image: 'ubuntu-22-04-x64',
             ssh_keys: [],
