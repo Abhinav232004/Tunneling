@@ -102,5 +102,5 @@ async function findDropletByName(token, name) {
 
 // Export for use in other modules
 if (typeof module !== 'undefined' && module.exports) {
-    module.exports = { createDroplet, getDroplet, waitForDroplet, deleteDroplet };
+    module.exports = { createDroplet, getDroplet, waitForDroplet, deleteDroplet, findDropletByName };
 }
