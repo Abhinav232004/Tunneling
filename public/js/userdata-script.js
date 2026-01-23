@@ -2,6 +2,9 @@
 // Minimal script for snapshot-based deployment
 
 function generateUserDataScript(vncPassword) {
+    // Escape special characters for bash
+    const escapedPassword = vncPassword.replace(/'/g, "'\\''");
+
     return `#!/bin/bash
 set -e
 
@@ -12,7 +15,7 @@ echo "=== Starting desktop services ==="
 
 # Set VNC password
 mkdir -p /root/.vnc
-echo "${vncPassword}" | vncpasswd -f > /root/.vnc/passwd
+echo '${escapedPassword}' | vncpasswd -f > /root/.vnc/passwd
 chmod 600 /root/.vnc/passwd
 
 # Start VNC and noVNC services
