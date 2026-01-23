@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DigitalOcean Jump Box</title>
+    <title>Jump Box</title>
     <link rel="stylesheet" href="css/styles.css">
 </head>
 <body>
@@ -13,17 +13,18 @@
         </div>
 
         <div class="content">
-            <!-- Create Section -->
-            <div class="section" id="setupSection">
-                <button class="btn" id="launchBtn">Create Droplet</button>
+            <!-- Main Buttons -->
+            <div class="section" id="mainSection">
+                <button class="btn btn-success" id="createBtn">Create Droplet</button>
+                <button class="btn btn-danger" id="deleteBtn">Delete Droplet</button>
+                <button class="btn" id="joinBtn">Join Session</button>
                 <div class="status" id="status"></div>
             </div>
 
-            <!-- Control Section -->
+            <!-- GUI Section (shown after create) -->
             <div class="section" id="guiSection" style="display: none;">
                 <button class="btn btn-secondary" id="checkGuiBtn">Check GUI Status</button>
                 <button class="btn btn-success" id="openGuiBtn">Open Desktop</button>
-                <button class="btn btn-danger" id="deleteBtn">Delete Droplet</button>
                 <div class="status" id="guiStatus"></div>
             </div>
         </div>

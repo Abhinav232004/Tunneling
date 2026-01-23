@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(del \"d:\\\\Tunneling\\\\public\\\\js\\\\ssh-client.js\")",
+      "Bash(npm install)"
+    ]
+  }
+}

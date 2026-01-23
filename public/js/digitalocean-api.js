@@ -12,8 +12,8 @@ async function createDroplet(token, name, userData) {
         body: JSON.stringify({
             name: name,
             region: 'sgp1',
-            size: 's-1vcpu-1gb',
-            image: 'ubuntu-22-04-x64',
+            size: 's-2vcpu-4gb',
+            image: 214450589,
             ssh_keys: [],
             backups: false,
             ipv6: true,
@@ -53,11 +53,9 @@ async function waitForDroplet(token, dropletId, onStatusUpdate) {
         const droplet = response.droplet;
 
         if (droplet.status === 'active' && droplet.networks?.v4?.length > 0) {
-            // Wait additional time for SSH to be ready
             if (onStatusUpdate) {
-                onStatusUpdate('Droplet is active! Waiting for SSH service to be ready...');
+                onStatusUpdate('Droplet is active! Starting desktop...');
             }
-            await new Promise(resolve => setTimeout(resolve, 30000));
             return droplet;
         }
 
@@ -84,6 +82,22 @@ async function deleteDroplet(token, dropletId) {
     }
 
     return true;
+}
+
+async function findDropletByName(token, name) {
+    const response = await fetch(`${DO_API_BASE}/droplets?name=${encodeURIComponent(name)}`, {
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        throw new Error('Failed to search droplets');
+    }
+
+    const data = await response.json();
+    const droplet = data.droplets.find(d => d.name === name);
+    return droplet || null;
 }
 
 // Export for use in other modules
