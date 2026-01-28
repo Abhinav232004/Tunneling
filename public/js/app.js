@@ -28,9 +28,45 @@ async function loadConfig() {
     return config;
 }
 
+// Initialize and check droplet status on page load
+async function initializeApp() {
+    try {
+        await loadConfig();
+
+        showStatus(elements.statusDiv, 'Checking droplet status...', 'info');
+        const droplet = await findDropletByName(config.apiToken, DROPLET_NAME);
+
+        if (!droplet) {
+            showStatus(elements.statusDiv, 'No droplet found', 'info');
+            return;
+        }
+
+        dropletData = droplet;
+
+        // Check droplet status
+        if (droplet.status === 'active') {
+            const ip = droplet.networks?.v4?.[0]?.ip_address;
+            if (ip) {
+                showStatus(elements.statusDiv, `Droplet found`, 'success');
+                showElement(elements.guiSection);
+                showStatus(elements.guiStatusDiv, 'Click Check GUI Status', 'info');
+            } else {
+                showStatus(elements.statusDiv, 'Droplet found (waiting for IP)', 'info');
+            }
+        } else if (droplet.status === 'new') {
+            showStatus(elements.statusDiv, 'Droplet preparing...', 'info');
+        } else {
+            showStatus(elements.statusDiv, `Droplet status: ${droplet.status}`, 'info');
+        }
+
+    } catch (error) {
+        showStatus(elements.statusDiv, 'Ready to create droplet', 'info');
+    }
+}
+
 // Create Droplet Handler
 async function handleCreate() {
-    setButtonLoading(elements.createBtn, true, 'Creating...', 'Create Droplet');
+    setButtonLoading(elements.createBtn, true, 'Creating...', 'Create');
 
     try {
         await loadConfig();
@@ -66,13 +102,13 @@ async function handleCreate() {
     } catch (error) {
         showStatus(elements.statusDiv, `Error: ${error.message}`, 'error');
     } finally {
-        setButtonLoading(elements.createBtn, false, '', 'Create Droplet');
+        setButtonLoading(elements.createBtn, false, '', 'Create');
     }
 }
 
 // Delete Droplet Handler
 async function handleDelete() {
-    setButtonLoading(elements.deleteBtn, true, 'Deleting...', 'Delete Droplet');
+    setButtonLoading(elements.deleteBtn, true, 'Deleting...', 'Delete');
 
     try {
         await loadConfig();
@@ -98,13 +134,13 @@ async function handleDelete() {
     } catch (error) {
         showStatus(elements.statusDiv, `Error: ${error.message}`, 'error');
     } finally {
-        setButtonLoading(elements.deleteBtn, false, '', 'Delete Droplet');
+        setButtonLoading(elements.deleteBtn, false, '', 'Delete');
     }
 }
 
 // Join Session Handler
 async function handleJoin() {
-    setButtonLoading(elements.joinBtn, true, 'Finding...', 'Join Session');
+    setButtonLoading(elements.joinBtn, true, 'Finding...', 'Join');
 
     try {
         await loadConfig();
@@ -131,7 +167,7 @@ async function handleJoin() {
     } catch (error) {
         showStatus(elements.statusDiv, `Error: ${error.message}`, 'error');
     } finally {
-        setButtonLoading(elements.joinBtn, false, '', 'Join Session');
+        setButtonLoading(elements.joinBtn, false, '', 'Join');
     }
 }
 
@@ -172,3 +208,6 @@ elements.deleteBtn.addEventListener('click', handleDelete);
 elements.joinBtn.addEventListener('click', handleJoin);
 elements.checkGuiBtn.addEventListener('click', handleCheckGui);
 elements.openGuiBtn.addEventListener('click', handleOpenGui);
+
+// Initialize app on page load
+initializeApp();
