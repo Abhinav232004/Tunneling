@@ -13,7 +13,7 @@ async function createDroplet(token, name, userData) {
             name: name,
             region: 'sgp1',
             size: 's-2vcpu-4gb',
-            image: 214450589,
+            image: 215092001,
             ssh_keys: [],
             backups: false,
             ipv6: true,
